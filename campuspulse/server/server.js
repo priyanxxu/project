@@ -7,6 +7,8 @@ import passport from 'passport';
 import mongoose from 'mongoose';
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { connectDB, databaseState, isDatabaseReady } from './config/db.js';
 import { ensureIndexes } from './config/ensureIndexes.js';
 import { configurePassport } from './config/passport.js';
@@ -24,6 +26,9 @@ const app = express();
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+const currentFile = fileURLToPath(import.meta.url);
+const currentDirectory = path.dirname(currentFile);
+const frontendDirectory = path.resolve(currentDirectory, '../dist');
 if (!clientUrl.startsWith('http://') && !clientUrl.startsWith('https://')) {
   throw new Error('CLIENT_URL must be a valid http(s) URL.');
 }
@@ -64,6 +69,12 @@ app.use('/api', registrationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api', notificationRoutes);
+
+app.use(express.static(frontendDirectory));
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) return next();
+  return res.sendFile(path.join(frontendDirectory, 'index.html'));
+});
 
 app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found' }));
 app.use((err, req, res, next) => {
