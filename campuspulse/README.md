@@ -1,6 +1,6 @@
 
 # CampusPulse
-=======
+
 # CampusPulse — MERN Backend Integration
 
 This version keeps the existing React + Tailwind UI and adds a real Express + MongoDB + Mongoose backend. The existing root folder remains the Vite frontend because the original project already used that structure; a separate `server/` folder is added instead of creating a duplicate `client/` application.
