@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # CampusPulse
 =======
 # CampusPulse — MERN Backend Integration
