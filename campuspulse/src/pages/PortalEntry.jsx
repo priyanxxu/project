@@ -1,0 +1,12 @@
+import { useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import PageShell from '../components/PageShell';
+import { useAuth } from '../context/AuthContext';
+
+export default function PortalEntry(){
+  const { role } = useParams(); const nav = useNavigate(); const { login } = useAuth();
+  const [form,setForm]=useState({email:'',password:''}); const [loading,setLoading]=useState(false); const [error,setError]=useState('');
+  const admin=role==='admin';
+  async function submit(e){e.preventDefault();setLoading(true);setError('');try{const user=await login({...form,portalRole:admin?'admin':'organizer'});nav(user.role==='admin'?'/admin/dashboard':'/organizer/dashboard',{replace:true});}catch(err){setError(err.message)}finally{setLoading(false)}}
+  return <PageShell><section className="container-page grid min-h-[70vh] place-items-center py-14"><form onSubmit={submit} className="w-full max-w-md rounded-3xl border bg-white p-7 shadow-xl"><div className="text-xs font-bold uppercase tracking-widest text-primary">Authorized access</div><h1 className="mt-3 text-3xl font-black">{admin?'Admin Portal':'Organizer Portal'}</h1><p className="mt-2 text-sm text-gray-500">{admin?'Manage the CampusPulse event ecosystem.':'Create, manage and grow your campus events.'}</p><div className="mt-7 grid gap-4"><label className="text-sm font-bold">{admin?'Admin':'Organizer'} Email<input required type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} className="mt-1 w-full rounded-xl border p-3"/></label><label className="text-sm font-bold">Password<input required type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} className="mt-1 w-full rounded-xl border p-3"/></label></div>{error&&<p className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p>}<button disabled={loading} className="mt-6 w-full rounded-xl bg-primary py-3 font-bold text-white disabled:opacity-60">{loading?'Signing in...':admin?'Admin Sign In':'Sign in as Organizer'}</button>{admin&&<p className="mt-4 text-center text-xs text-gray-500">Authorized campus administrators only.</p>}{!admin&&<p className="mt-4 text-center text-xs text-gray-500">Want to become an organizer? Register with Organizer account type.</p>}<Link to="/handle-event" className="mt-5 block text-center text-sm font-semibold text-gray-500">← Back</Link></form></section></PageShell>
+}

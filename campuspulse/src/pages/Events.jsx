@@ -1,0 +1,10 @@
+import { useEffect, useMemo, useState } from 'react';
+import PageShell from '../components/PageShell'; import EventCard from '../components/EventCard'; import AIAssistant from '../components/AIAssistant'; import { eventAPI } from '../services/api'; import { socket } from '../services/socket';
+export default function Events(){
+ const[q,setQ]=useState('');const[c,setC]=useState('All');const[events,setEvents]=useState([]);const[loading,setLoading]=useState(true);const[error,setError]=useState('');
+ const load=()=>eventAPI.getEvents().then(r=>setEvents(r.data||[])).catch(e=>setError(e.message)).finally(()=>setLoading(false));
+ useEffect(()=>{load();const refresh=()=>load();socket.on('event:published',refresh);return()=>socket.off('event:published',refresh)},[]);
+ const cats=['All',...new Set(events.map(e=>e.category))];
+ const list=useMemo(()=>events.filter(e=>(c==='All'||e.category===c)&&e.title.toLowerCase().includes(q.toLowerCase())),[events,c,q]);
+ return <PageShell><section className="container-page py-14"><h1 className="text-4xl font-black">Campus Events</h1><p className="mt-3 text-gray-500">Discover workshops, competitions and cultural experiences.</p><input value={q} onChange={e=>setQ(e.target.value)} className="mt-8 w-full rounded-xl border bg-white p-4 outline-none focus:border-primary" placeholder="Search events..."/><div className="mt-4 flex gap-2 overflow-x-auto pb-2">{cats.map(x=><button onClick={()=>setC(x)} key={x} className={`whitespace-nowrap rounded-xl px-4 py-2 text-sm font-bold ${c===x?'bg-primary text-white':'border bg-white'}`}>{x}</button>)}</div>{error&&<p className="mt-6 rounded-xl bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</p>}{loading?<p className="mt-8 text-sm text-gray-500">Loading events...</p>:<div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{list.map(e=><EventCard key={e._id} event={{...e,id:e._id,registered:e.registrationCount||0,organizer:e.organizer?.name||'Campus organizer',icon:e.icon||'📅'}}/>)}</div>}{!loading&&!list.length&&<p className="mt-8 text-sm text-gray-500">No approved events match your search.</p>}<AIAssistant/></section></PageShell>
+}

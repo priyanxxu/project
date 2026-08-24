@@ -1,0 +1,1 @@
+CampusPulse AI homepage upgrade: conversational general AI, grounded CampusPulse event answers, follow-up context, suggested prompts, loading/error states, copy/regenerate/clear. Existing auth, events, dashboards and database architecture preserved.
